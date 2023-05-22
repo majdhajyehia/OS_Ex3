@@ -11,7 +11,8 @@ class Job{
 private:
     JobState _state;
 public:
-
+  const JobState get_state();
+  void set_state(JobState state);
 };
 
 #endif //RESOURCES_JOB_H
