@@ -11,7 +11,6 @@ set(CMAKE_CXX_FLAGS -pthread)
 add_executable(OS_Ex3
         Job.cpp
         Job.h
-        MapReduceClient.cpp
         MapReduceClient.h
         MapReduceFramework.cpp
         MapReduceFramework.h

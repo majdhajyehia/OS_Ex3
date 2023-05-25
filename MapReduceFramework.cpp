@@ -23,18 +23,12 @@ void* thread_logic(void* arg)
   MapReduceClient &client = (MapReduceClient &) thread_job->get_client();
   InputVec input_vec = thread_job->get_inputs_elements();
   OutputVec output_vec = thread_job->get_output_elements();
-  int threads_count = thread_job->get_threads_count();
   // BEGIN: Mapping Phase
-  for (int i = *(tc->input_elements); i < input_vec.size(); ++i) {
-    int old_value = (*(tc->input_elements))++;
-    thread_job->set_state ({MAP_STAGE, 0});
-    for(auto it = input_vec.begin(); it != input_vec.end(); ++it)
-    {
-      client.map (it->first, it->second, tc);
-      float new_percent = thread_job->get_percentage() + 1;
-      thread_job->set_percentage (new_percent);
-
-    }
+  unsigned long old_value = 0;
+  while((old_value = *(tc->input_elements)++) < input_vec.size())
+  {
+    client.map (input_vec[old_value].first,
+                input_vec[old_value].second, tc);
   }
   // END: Mapping Phase
   return 0;
@@ -54,7 +48,6 @@ JobHandle startMapReduceJob(const MapReduceClient& client,
   {
     pthread_t* new_thread = new pthread_t;
     job_threads.push_back (std::make_pair (new_thread, thread_context));
-    // TODO: Complete the startRoutine Implementation
     pthread_create (new_thread, NULL, thread_logic, &thread_context);
   }
   new_job->set_threads (job_threads);
