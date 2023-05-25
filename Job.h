@@ -9,10 +9,12 @@
 #include <vector>
 #include <atomic>
 #include <functional>
+#include "Barrier.h"
 
 typedef struct {
     std::atomic<int>* input_elements;
     JobHandle job_handle;
+    int thread_id;
 } ThreadContext;
 
 typedef std::pair<pthread_t*, ThreadContext> thread_pair;
@@ -25,8 +27,10 @@ private:
     threads_collection _threads;
     InputVec _input_elements;
     OutputVec _output_elements;
+    IntermediateVec *_intermediate_vectors;
     const MapReduceClient &_client;
     int _threads_count;
+
 public:
   Job(threads_collection threads, JobState state, const MapReduceClient
   &client);
@@ -45,6 +49,8 @@ public:
   void set_percentage(float percent);
   void set_stage(stage_t stage);
   const int get_threads_count();
+  IntermediateVec* get_intermediate_vectors();
+  Barrier barrier;
 };
 
 #endif //RESOURCES_JOB_H

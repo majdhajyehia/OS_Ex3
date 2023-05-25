@@ -4,7 +4,9 @@ Job::Job (threads_collection threads, JobState state, const MapReduceClient
 &client) : _threads
 (threads),
 _state(state), _client(client)
-{}
+{
+  this->_intermediate_vectors = new IntermediateVec [threads.size()];
+}
 
 Job::Job (JobState state, InputVec input_vec,
           OutputVec output_vec, const MapReduceClient &client, int
@@ -15,7 +17,9 @@ Job::Job (JobState state, InputVec input_vec,
           _output_elements(output_vec),
           _client(client),
           _threads_count(threads_count)
-{}
+{
+  this->_intermediate_vectors = new IntermediateVec [threads_count];
+}
 
 const JobState Job::get_state ()
 {
@@ -76,3 +80,9 @@ const int Job::get_threads_count ()
 {
   return this->_threads_count;
 }
+
+IntermediateVec* Job::get_intermediate_vectors ()
+{
+  return this->_intermediate_vectors;
+}
+
