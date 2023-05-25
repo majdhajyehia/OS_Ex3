@@ -16,17 +16,27 @@ void closeJobHandle(JobHandle job)
   // Delete Job
 }
 
-void* startRoutine(void* arg)
+void* thread_logic(void* arg)
 {
   ThreadContext* tc = (ThreadContext*) arg;
+  Job *thread_job = (Job *)tc->job_handle;
+  MapReduceClient &client = (MapReduceClient &) thread_job->get_client();
+  InputVec input_vec = thread_job->get_inputs_elements();
+  OutputVec output_vec = thread_job->get_output_elements();
+  int threads_count = thread_job->get_threads_count();
+  // BEGIN: Mapping Phase
+  for (int i = *(tc->input_elements); i < input_vec.size(); ++i) {
+    int old_value = (*(tc->input_elements))++;
+    thread_job->set_state ({MAP_STAGE, 0});
+    for(auto it = input_vec.begin(); it != input_vec.end(); ++it)
+    {
+      client.map (it->first, it->second, tc);
+      float new_percent = thread_job->get_percentage() + 1;
+      thread_job->set_percentage (new_percent);
 
-  for (int i = 0; i < 1000; ++i) {
-    // old_value isn't used in this example, but will be necessary
-    // in the exercise
-    int old_value = (*(tc->atomic_counter))++;
-    (void) old_value;  // ignore not used warning
-    (*(tc->bad_counter))++;
+    }
   }
+  // END: Mapping Phase
   return 0;
 }
 
@@ -35,7 +45,9 @@ JobHandle startMapReduceJob(const MapReduceClient& client,
                             int multiThreadLevel)
 {
   std::atomic<int> atomic_counter(0);
-  ThreadContext thread_context = {&atomic_counter};
+  Job *new_job = new Job({UNDEFINED_STAGE, 0}, inputVec, outputVec, client,
+                         multiThreadLevel);
+  ThreadContext thread_context = {&atomic_counter, new_job};
   threads_collection job_threads;
   job_threads.reserve (multiThreadLevel);
   for(int i = 0; i < multiThreadLevel; ++i)
@@ -43,9 +55,13 @@ JobHandle startMapReduceJob(const MapReduceClient& client,
     pthread_t* new_thread = new pthread_t;
     job_threads.push_back (std::make_pair (new_thread, thread_context));
     // TODO: Complete the startRoutine Implementation
-    pthread_create (new_thread, NULL, startRoutine, &thread_context);
+    pthread_create (new_thread, NULL, thread_logic, &thread_context);
   }
-  Job *new_job = new Job(job_threads, {UNDEFINED_STAGE, 0});
+  new_job->set_threads (job_threads);
+  for(auto it = job_threads.begin(); it != job_threads.end(); ++it)
+  {
+    pthread_join (*(it->first), NULL);
+  }
   return new_job;
 }
 

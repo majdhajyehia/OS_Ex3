@@ -8,25 +8,43 @@
 #include <pthread.h>
 #include <vector>
 #include <atomic>
+#include <functional>
 
 typedef struct {
-    std::atomic<int>* atomic_counter;
-    int* bad_counter;
+    std::atomic<int>* input_elements;
+    JobHandle job_handle;
 } ThreadContext;
 
-typedef std::vector<std::pair<pthread_t*, ThreadContext>> threads_collection;
-
+typedef std::pair<pthread_t*, ThreadContext> thread_pair;
+typedef std::vector<thread_pair> threads_collection;
 
 
 class Job{
 private:
     JobState _state;
     threads_collection _threads;
+    InputVec _input_elements;
+    OutputVec _output_elements;
+    const MapReduceClient &_client;
+    int _threads_count;
 public:
-  Job(threads_collection threads, JobState state); // Constructor
+  Job(threads_collection threads, JobState state, const MapReduceClient
+  &client);
+  // Constructor
+  Job(JobState state, InputVec input_vec, OutputVec
+  output_vec, const MapReduceClient &client, int threads_count);
   const JobState get_state();
   void set_state(JobState state);
-
+  void set_threads(threads_collection threads);
+  void append_thread(thread_pair pair);
+  const InputVec get_inputs_elements();
+  const OutputVec get_output_elements();
+  const MapReduceClient& get_client();
+  const float get_percentage();
+  const stage_t get_stage();
+  void set_percentage(float percent);
+  void set_stage(stage_t stage);
+  const int get_threads_count();
 };
 
 #endif //RESOURCES_JOB_H
