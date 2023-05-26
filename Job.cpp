@@ -86,3 +86,7 @@ IntermediateVec* Job::get_intermediate_vectors ()
   return this->_intermediate_vectors;
 }
 
+intermediate_unique_k2_vector* Job::get_unique_k2_keys ()
+{
+  return this->_unique_k2_keys;
+}

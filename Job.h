@@ -13,12 +13,15 @@
 
 typedef struct {
     std::atomic<int>* input_elements;
+    std::atomic<int>* shuffle_atomic;
     JobHandle job_handle;
     int thread_id;
+    unsigned long unique_k2_keys_count;
 } ThreadContext;
 
 typedef std::pair<pthread_t*, ThreadContext> thread_pair;
 typedef std::vector<thread_pair> threads_collection;
+typedef std::vector<K2*> intermediate_unique_k2_vector;
 
 
 class Job{
@@ -30,6 +33,7 @@ private:
     IntermediateVec *_intermediate_vectors;
     const MapReduceClient &_client;
     int _threads_count;
+    intermediate_unique_k2_vector* _unique_k2_keys;
 
 public:
   Job(threads_collection threads, JobState state, const MapReduceClient
@@ -51,6 +55,7 @@ public:
   const int get_threads_count();
   IntermediateVec* get_intermediate_vectors();
   Barrier barrier;
+  intermediate_unique_k2_vector* get_unique_k2_keys();
 };
 
 #endif //RESOURCES_JOB_H
