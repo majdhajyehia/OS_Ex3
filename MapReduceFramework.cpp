@@ -37,6 +37,9 @@ void *thread_logic (void *arg)
   int thread_id = tc->thread_id;
   // BEGIN: Mapping Phase
   unsigned long old_value = 0;
+/***
+ * if theres a syncronization proplem with map might need to add atomic wait.
+ */
   while ((old_value = *(tc->input_elements)++) < input_vec.size ())
   {
     client.map (input_vec[old_value].first,
@@ -66,6 +69,9 @@ void *thread_logic (void *arg)
     unique_k2_vectors[thread_id].resize ((unsigned long) std::distance
         (unique_k2_vectors[thread_id].begin (), it));
   }
+  /***
+   * just making sure, this is sorting back into intermidate vectors and uniq k2 is just the uniqe keys we never append the values of reappiring keys here.
+   */
   // END: Sorting Phase
 
   thread_job->barrier.barrier ();

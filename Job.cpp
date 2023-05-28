@@ -1,5 +1,7 @@
 #include "Job.h"
-
+/**
+ * can this constructor be deleated, is it used?
+ */
 Job::Job (threads_collection threads, JobState state, const MapReduceClient
 &client) : _threads
 (threads),
@@ -7,7 +9,14 @@ _state(state), _client(client)
 {
   this->_intermediate_vectors = new IntermediateVec [threads.size()];
 }
-
+/**
+ *
+ * @param state the state of the job should be init as undifiend
+ * @param input_vec the vector of inputs from the client
+ * @param output_vec empty vec to return to client
+ * @param client client map reduce
+ * @param threads_count the amount of threads to run
+ */
 Job::Job (JobState state, InputVec input_vec,
           OutputVec output_vec, const MapReduceClient &client, int
           threads_count) :
@@ -16,7 +25,8 @@ Job::Job (JobState state, InputVec input_vec,
           _input_elements(input_vec),
           _output_elements(output_vec),
           _client(client),
-          _threads_count(threads_count)
+          _threads_count(threads_count),
+          barrier(Barrier(threads_count)) //added berrier creation
 {
   this->_intermediate_vectors = new IntermediateVec [threads_count];
 }
