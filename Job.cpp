@@ -26,7 +26,9 @@ Job::Job (JobState state, InputVec input_vec,
           _output_elements(output_vec),
           _client(client),
           _threads_count(threads_count),
-          barrier(Barrier(threads_count)) //added berrier creation
+          barrier(Barrier(threads_count)), //added berrier creation
+          intermidiate_vector_mutex(PTHREAD_MUTEX_INITIALIZER), //added mutex creation to lock the intermidiate vector
+          output_vector_mutex(PTHREAD_MUTEX_INITIALIZER) //added mutex creation to lock the output vector
 {
   this->_intermediate_vectors = new IntermediateVec [threads_count];
 }

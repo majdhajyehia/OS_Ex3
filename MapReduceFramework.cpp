@@ -77,6 +77,9 @@ void *thread_logic (void *arg)
   thread_job->barrier.barrier ();
 
   // BEGIN: Shuffling Phase
+  /**
+   * great, it should block untill all threads finish map and only one shall do the shuffle
+   */
   int initial_value = (*(tc->shuffle_atomic))++;
   if (initial_value == 0)
   {
@@ -113,7 +116,12 @@ void *thread_logic (void *arg)
     }
   }
   // END: Shuffling Phase
-
+  // Wait for the Shuffling thread to finish
+  thread_job->barrier.barrier();
+  // BEGIN: reducings Phase
+  /**
+   * shouldn't the reduce part go here instead of return?
+   */
   return 0;
 }
 

@@ -56,6 +56,8 @@ public:
   IntermediateVec* get_intermediate_vectors();
   Barrier barrier;
   intermediate_unique_k2_vector* get_unique_k2_keys();
+  pthread_mutex_t intermidiate_vector_mutex;
+  pthread_mutex_t output_vector_mutex;
 };
 
 #endif //RESOURCES_JOB_H
