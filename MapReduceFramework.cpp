@@ -37,7 +37,7 @@ void *thread_logic (void *arg)
   OutputVec output_vec = thread_job->get_output_elements ();
   int thread_id = tc->thread_id;
   // BEGIN: Mapping Phase
-  thread_job->set_state(MAP_STAGE);
+  thread_job->set_stage(MAP_STAGE);
   unsigned long old_value = 0;
 /***
  * if theres a syncronization proplem with map might need to add atomic wait.
@@ -85,7 +85,7 @@ void *thread_logic (void *arg)
   int initial_value = (*(tc->shuffle_atomic))++;
   if (initial_value == 0)
   {
-    thread_job->set_state(SHUFFLE_STAGE);
+    thread_job->set_stage(SHUFFLE_STAGE);
     intermediate_unique_k2_vector unique_keys_copy;
     for (int i = 0; i < thread_job->get_threads_count (); ++i)
     {
@@ -125,7 +125,7 @@ void *thread_logic (void *arg)
   // Wait for the Shuffling thread to finish
   thread_job->barrier.barrier();
   // BEGIN: reducings Phase
-  thread_job->set_state(REDUCE_STAGE);
+  thread_job->set_stage(REDUCE_STAGE);
   IntermediateVec current_vec;
   while(true)
   {

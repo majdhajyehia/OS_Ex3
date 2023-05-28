@@ -42,7 +42,7 @@ public:
   Job(JobState state, InputVec input_vec, OutputVec
   output_vec, const MapReduceClient &client, int threads_count);
   const JobState get_state();
-  void set_state(stage_t state);
+  void set_state(JobState state);
   void set_threads(threads_collection threads);
   void append_thread(thread_pair pair);
   const InputVec get_inputs_elements();
