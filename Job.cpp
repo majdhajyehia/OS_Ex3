@@ -27,7 +27,7 @@ Job::Job (JobState state, InputVec input_vec,
           _client(client),
           _threads_count(threads_count),
           barrier(Barrier(threads_count)), //added berrier creation
-          intermidiate_vector_mutex(PTHREAD_MUTEX_INITIALIZER), //added mutex creation to lock the intermidiate vector
+          shuffeld_vector_mutex(PTHREAD_MUTEX_INITIALIZER), //added mutex creation to lock the intermidiate vector
           output_vector_mutex(PTHREAD_MUTEX_INITIALIZER) //added mutex creation to lock the output vector
 {
   this->_intermediate_vectors = new IntermediateVec [threads_count];
@@ -96,6 +96,11 @@ const int Job::get_threads_count ()
 IntermediateVec* Job::get_intermediate_vectors ()
 {
   return this->_intermediate_vectors;
+}
+
+void Job::set_intermediate_vectors(IntermediateVec* intermediate_vectors)
+{
+    this->_intermediate_vectors = intermediate_vectors;
 }
 
 intermediate_unique_k2_vector* Job::get_unique_k2_keys ()
