@@ -56,6 +56,11 @@ public:
   IntermediateVec* get_intermediate_vectors();
   Barrier barrier;
   intermediate_unique_k2_vector* get_unique_k2_keys();
+  std::vector<IntermediateVec> shuffeld_vec;
+  pthread_mutex_t shuffeld_vector_mutex;
+  pthread_mutex_t output_vector_mutex;
+
+  void set_intermediate_vectors(IntermediateVec *intermediate_vectors);
 };
 
 #endif //RESOURCES_JOB_H
