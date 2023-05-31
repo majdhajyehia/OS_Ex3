@@ -14,6 +14,7 @@
 typedef struct {
     std::atomic<int>* input_elements;
     std::atomic<int>* shuffle_atomic;
+    std::atomic<int>* reduce_atomic;
     JobHandle job_handle;
     int thread_id;
     unsigned long unique_k2_keys_count;
@@ -33,11 +34,12 @@ private:
     IntermediateVec *_intermediate_vectors;
     const MapReduceClient &_client;
     int _threads_count;
+    int _intermidiate_elements_count;
     intermediate_unique_k2_vector* _unique_k2_keys;
-
+~Job();
 public:
-  Job(threads_collection threads, JobState state, const MapReduceClient
-  &client);
+//  Job(threads_collection threads, JobState state, const MapReduceClient
+//  &client);
   // Constructor
   Job(JobState state, InputVec input_vec, OutputVec
   output_vec, const MapReduceClient &client, int threads_count);
@@ -53,6 +55,7 @@ public:
   void set_percentage(float percent);
   void set_stage(stage_t stage);
   const int get_threads_count();
+  void load_intermidiate_elements_count();
   IntermediateVec* get_intermediate_vectors();
   Barrier barrier;
   intermediate_unique_k2_vector* get_unique_k2_keys();

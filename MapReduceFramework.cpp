@@ -9,7 +9,8 @@
 void getJobState (JobHandle job, JobState *state)
 {
   Job *_job = (Job *) job;
-  _job->set_state (*state);
+  state->stage=_job->get_stage();
+  state->percentage=_job->get_percentage();
 }
 
 void closeJobHandle (JobHandle job)
@@ -86,6 +87,7 @@ void *thread_logic (void *arg)
   if (initial_value == 0)
   {
     thread_job->set_stage(SHUFFLE_STAGE);
+    thread_job->load_intermidiate_elements_count();
     intermediate_unique_k2_vector unique_keys_copy;
     for (int i = 0; i < thread_job->get_threads_count (); ++i)
     {
@@ -112,6 +114,7 @@ void *thread_logic (void *arg)
                pair_check_equals (thread_job->get_intermediate_vectors ()[i].back ().first,
                                   key))
         {
+          tc->shuffle_atomic++;
           new_keys_vec.push_back (thread_job->get_intermediate_vectors ()[i]
                                       .back ());
           thread_job->get_intermediate_vectors ()[i].pop_back ();
@@ -127,6 +130,7 @@ void *thread_logic (void *arg)
   // BEGIN: reducings Phase
   thread_job->set_stage(REDUCE_STAGE);
   IntermediateVec current_vec;
+  int reduce_counter;
   while(true)
   {
       pthread_mutex_lock(&thread_job->shuffeld_vector_mutex);
@@ -136,9 +140,11 @@ void *thread_logic (void *arg)
           break;
       }
       current_vec = thread_job->shuffeld_vec.back();
+      reduce_counter = current_vec.size();
       thread_job->shuffeld_vec.pop_back();
       pthread_mutex_unlock(&thread_job->shuffeld_vector_mutex);
       client.reduce(&current_vec,tc);
+      tc->reduce_atomic->fetch_add(reduce_counter);
   }
     // END reducing phase
 
@@ -162,6 +168,7 @@ JobHandle startMapReduceJob (const MapReduceClient &client,
     ThreadContext thread_context = {
         &atomic_counter,
         0,
+        0,
         new_job,
         i,
         0};
@@ -172,12 +179,12 @@ JobHandle startMapReduceJob (const MapReduceClient &client,
   new_job->set_threads (job_threads);
   for (auto it = job_threads.begin (); it != job_threads.end (); ++it)
   {
-    pthread_join (*(it->first), NULL);
+    pthread_join (*(it->first), NULL);//TODO fix this because it doesn't makes sence
   }
   return new_job;
 }
 
-void waitForJob (JobHandle job)
+void waitForJob (JobHandle job)//TODO create this function
 {
 
 }

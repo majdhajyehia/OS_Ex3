@@ -2,13 +2,13 @@
 /**
  * can this constructor be deleated, is it used?
  */
-Job::Job (threads_collection threads, JobState state, const MapReduceClient
-&client) : _threads
-(threads),
-_state(state), _client(client)
-{
-  this->_intermediate_vectors = new IntermediateVec [threads.size()];
-}
+//Job::Job (threads_collection threads, JobState state, const MapReduceClient
+//&client) : _threads
+//(threads),
+//_state(state), _client(client)
+//{
+//  this->_intermediate_vectors = new IntermediateVec [threads.size()];
+//}
 /**
  *
  * @param state the state of the job should be init as undifiend
@@ -70,7 +70,35 @@ const MapReduceClient& Job::get_client ()
 
 const float Job::get_percentage()
 {
-  return this->_state.percentage;
+    stage_t current_stage = get_stage();
+    if (current_stage==UNDEFINED_STAGE)
+    {
+        _state.percentage=0.0;
+    }
+    if(current_stage==MAP_STAGE)
+    {
+        _state.percentage = float(_threads.back().second.input_elements->load()/_input_elements.size());
+    }
+    if(current_stage==SHUFFLE_STAGE)
+    {
+        if(_intermidiate_elements_count == 0)
+        {
+            load_intermidiate_elements_count();
+        }
+        if (_intermidiate_elements_count == 0)
+        {
+            _state.percentage =0;
+        }
+        else {
+            _state.percentage = float(_threads.back().second.shuffle_atomic->load() / _intermidiate_elements_count);
+        }
+    }
+    if (current_stage == REDUCE_STAGE)
+    {
+        //might need to check for reduced instead of intermidiate but i think its ok
+        _state.percentage = float(_threads.back().second.reduce_atomic->load() / _intermidiate_elements_count);
+    }
+    return this->_state.percentage;
 }
 
 const stage_t Job::get_stage()
@@ -106,4 +134,15 @@ void Job::set_intermediate_vectors(IntermediateVec* intermediate_vectors)
 intermediate_unique_k2_vector* Job::get_unique_k2_keys ()
 {
   return this->_unique_k2_keys;
+}
+/**
+ * loads the number of elements in all intermidaiate vectors for precantage calculation
+ */
+void Job::load_intermidiate_elements_count() {
+    int count = 0;
+    for (int i = 0; i<_intermediate_vectors->size(); i++)
+    {
+        count = count + _intermediate_vectors[i].size();
+    }
+    _intermidiate_elements_count = count;
 }

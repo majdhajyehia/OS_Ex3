@@ -14,4 +14,6 @@ add_executable(OS_Ex3
         MapReduceClient.h
         MapReduceFramework.cpp
         MapReduceFramework.h
-        main.cpp)
+        main.cpp
+        Barrier.h
+        Barrier.cpp)
