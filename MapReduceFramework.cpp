@@ -182,17 +182,17 @@ JobHandle startMapReduceJob (const MapReduceClient &client,
   new_job->set_threads (job_threads);
 //  for (auto it = job_threads.begin (); it != job_threads.end (); ++it)
 //  {
-//    pthread_join (*(it->first), NULL);//TODO fix this because it doesn't makes sence
+//    pthread_join (*(it->first), NULL);//
 //  }
   return new_job;
 }
 
-void waitForJob (JobHandle job)//TODO create this function
+void waitForJob (JobHandle job)//TODO add check for multiple wait for
 {
     threads_collection job_threads = ((Job *) job)->get_threads();
     for (auto it = job_threads.begin (); it != job_threads.end (); ++it)
     {
-        pthread_join (*(it->first), NULL);//TODO fix this because it doesn't makes sence
+        pthread_join (*(it->first), NULL);
     }
 }
 
