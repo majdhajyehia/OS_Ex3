@@ -146,3 +146,11 @@ void Job::load_intermidiate_elements_count() {
     }
     _intermidiate_elements_count = count;
 }
+
+threads_collection Job::get_threads() {
+    return _threads;
+}
+
+Job::~Job() {
+
+}

@@ -16,6 +16,7 @@ void getJobState (JobHandle job, JobState *state)
 void closeJobHandle (JobHandle job)
 {
   waitForJob (job);
+  delete ((Job *) job);
   // Delete Job
 }
 
@@ -158,7 +159,9 @@ JobHandle startMapReduceJob (const MapReduceClient &client,
                              const InputVec &inputVec, OutputVec &outputVec,
                              int multiThreadLevel)
 {
-  std::atomic<int> atomic_counter (0);
+  std::atomic<int>* input_elements(0);
+  std::atomic<int>* shuffle_atomic(0);
+  std::atomic<int>* reduce_atomic(0);
   Job *new_job = new Job ({UNDEFINED_STAGE, 0}, inputVec, outputVec, client,
                           multiThreadLevel);
   threads_collection job_threads;
@@ -166,9 +169,9 @@ JobHandle startMapReduceJob (const MapReduceClient &client,
   for (int i = 0; i < multiThreadLevel; ++i)
   {
     ThreadContext thread_context = {
-        &atomic_counter,
-        0,
-        0,
+        input_elements,
+        shuffle_atomic,
+        reduce_atomic,
         new_job,
         i,
         0};
@@ -177,16 +180,20 @@ JobHandle startMapReduceJob (const MapReduceClient &client,
     pthread_create (new_thread, NULL, thread_logic, &thread_context);
   }
   new_job->set_threads (job_threads);
-  for (auto it = job_threads.begin (); it != job_threads.end (); ++it)
-  {
-    pthread_join (*(it->first), NULL);//TODO fix this because it doesn't makes sence
-  }
+//  for (auto it = job_threads.begin (); it != job_threads.end (); ++it)
+//  {
+//    pthread_join (*(it->first), NULL);//TODO fix this because it doesn't makes sence
+//  }
   return new_job;
 }
 
 void waitForJob (JobHandle job)//TODO create this function
 {
-
+    threads_collection job_threads = ((Job *) job)->get_threads();
+    for (auto it = job_threads.begin (); it != job_threads.end (); ++it)
+    {
+        pthread_join (*(it->first), NULL);//TODO fix this because it doesn't makes sence
+    }
 }
 
 void emit2 (K2 *key, V2 *value, void *context)
